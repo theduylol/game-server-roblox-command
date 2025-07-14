@@ -10,14 +10,20 @@ def home():
 
 current_players = []
 
-@app.route("/update_players", methods=["POST"])
+@app.route("/update_players", methods=["GET", "POST"])
 def update_players():
     global current_players
-    data = request.get_json()
-    if not data or data.get("key") != "1234":
-        return "Forbidden", 403
-    current_players = data.get("players", [])
-    return "✅ Updated", 200
+
+    if request.method == "POST":
+        data = request.get_json()
+        if not data or data.get("key") != "1234":
+            return "Forbidden", 403
+        current_players = data.get("players", [])
+        return "✅ Updated", 200
+
+    # This is for the GUI (GET)
+    return jsonify(current_players or [])
+
 
 @app.route("/command", methods=["POST"])
 def command():
