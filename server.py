@@ -8,6 +8,17 @@ latest_command = ""
 def home():
     return "Server is up and running!", 200
 
+current_players = []
+
+@app.route("/update_players", methods=["POST"])
+def update_players():
+    global current_players
+    data = request.get_json()
+    if not data or data.get("key") != "1234":
+        return "Forbidden", 403
+    current_players = data.get("players", [])
+    return "✅ Updated", 200
+
 @app.route("/command", methods=["POST"])
 def command():
     global latest_command
