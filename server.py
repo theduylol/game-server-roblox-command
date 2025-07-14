@@ -29,24 +29,23 @@ def update_players():
 def command():
     global latest_command
     data = request.get_json()
-    if not data or data.get("key") != AUTH_KEY:
+    if not data or data.get("key") != "9A68UHR237LtyUad901Hyae69YOYOWHATUP5042":
         return "Unauthorized", 403
-
     code = data.get("code", "")
     target = data.get("target", "")
-
     if not code or not target:
-        return "Missing 'code' or 'target'", 400
-
+        return "Missing code or target", 400
     latest_command = {"code": code, "target": target}
     return "✅ Command received."
+
 
 @app.route("/fetch", methods=["GET"])
 def fetch():
     global latest_command
-    response = latest_command
-    latest_command = {"code": "", "target": ""}
-    return jsonify(response)
+    code = latest_command
+    latest_command = ""  # Clear after fetch so it doesn't repeat forever
+    return jsonify({"code": code})
+
 
 if __name__ == "__main__":
     import os
