@@ -7,4 +7,4 @@ latest_command = ""
 def command():
     global latest_command
     data = request.get_json()
-    if data.get("key") != "1
+    if data.get("key") != "1"
