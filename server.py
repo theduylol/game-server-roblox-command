@@ -2,7 +2,9 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-latest_command = ""
+AUTH_KEY = "9A68UHR237LtyUad901Hyae69YOYOWHATUP5042"
+
+latest_command = {"code": "", "target": ""}
 
 @app.route("/")
 def home():
@@ -16,31 +18,35 @@ def update_players():
 
     if request.method == "POST":
         data = request.get_json()
-        if not data or data.get("key") != "1234":
+        if not data or data.get("key") != AUTH_KEY:
             return "Forbidden", 403
         current_players = data.get("players", [])
         return "✅ Updated", 200
 
-    # This is for the GUI (GET)
     return jsonify(current_players or [])
-
 
 @app.route("/command", methods=["POST"])
 def command():
     global latest_command
     data = request.get_json()
-    if not data or data.get("key") != "1234":  # Change "1234" to your secret key bro
+    if not data or data.get("key") != AUTH_KEY:
         return "Unauthorized", 403
+
     code = data.get("code", "")
-    latest_command = code
+    target = data.get("target", "")
+
+    if not code or not target:
+        return "Missing 'code' or 'target'", 400
+
+    latest_command = {"code": code, "target": target}
     return "✅ Command received."
 
 @app.route("/fetch", methods=["GET"])
 def fetch():
     global latest_command
-    code = latest_command
-    latest_command = ""  # Clear after fetch so it doesn't repeat forever
-    return jsonify({"code": code})
+    response = latest_command
+    latest_command = {"code": "", "target": ""}
+    return jsonify(response)
 
 if __name__ == "__main__":
     import os
