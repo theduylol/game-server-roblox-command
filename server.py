@@ -2,15 +2,15 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-AUTH_KEY = "9A68UHR237LtyUad901Hyae69YOYOWHATUP5042"
+latest_command = {}
 
-latest_command = {"code": "", "target": ""}
+current_players = []
+
+AUTH_KEY = "9A68UHR237LtyUad901Hyae69YOYOWHATUP5042"
 
 @app.route("/")
 def home():
     return "Server is up and running!", 200
-
-current_players = []
 
 @app.route("/update_players", methods=["GET", "POST"])
 def update_players():
@@ -23,6 +23,7 @@ def update_players():
         current_players = data.get("players", [])
         return "✅ Updated", 200
 
+    # GET for GUI
     return jsonify(current_players or [])
 
 @app.route("/command", methods=["POST"])
@@ -31,36 +32,28 @@ def command():
     data = request.get_json()
     if not data or data.get("key") != AUTH_KEY:
         return "Unauthorized", 403
-    
-    code = data.get("code", "")
+
+    # Expect "command", "args", "target"
+    command = data.get("command", "")
+    args = data.get("args", "")
     target = data.get("target", "")
-    
-    if not code or not target:
-        return "Missing code or target", 400
-    
+
+    if not command or not target:
+        return "Invalid payload", 400
+
     latest_command = {
-        "code": code,
+        "command": command,
+        "args": args,
         "target": target
     }
     return "✅ Command received."
 
-
-
 @app.route("/fetch", methods=["GET"])
 def fetch():
     global latest_command
-    # latest_command should be a dict with keys "code" and "target"
-    # e.g. latest_command = {"code": "...lua code...", "target": "playerName"}
-    data = latest_command
-    latest_command = {}  # clear after fetch
-
-    # If no command sent yet, send empty dict with empty fields
-    if not data or "code" not in data or "target" not in data:
-        return jsonify({"code": "", "target": ""})
-
-    return jsonify(data)
-
-
+    cmd = latest_command
+    latest_command = {}  # Clear after fetch
+    return jsonify(cmd)
 
 if __name__ == "__main__":
     import os
